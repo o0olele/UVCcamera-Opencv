@@ -166,25 +166,6 @@ public final class MainActivity extends BaseActivity implements CameraDialog.Cam
         mUVCCameraView = (CameraViewInterface)view;
         mUVCCameraView.setAspectRatio(PREVIEW_WIDTH / (float)PREVIEW_HEIGHT);
 
-        InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
-        File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-        mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
-        
-        try {
-            FileOutputStream os = new FileOutputStream(mCascadeFile);
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-            is.close();
-            os.close();
-        }catch (Exception e){
-            Log.v(TAG,e.getMessage());
-        }
-
-        mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
-
 		synchronized (mSync) {
 	        mUSBMonitor = new USBMonitor(this, mOnDeviceConnectListener);
 	        mCameraHandler = UVCCameraHandler.createHandler(this, mUVCCameraView,
@@ -247,6 +228,26 @@ public final class MainActivity extends BaseActivity implements CameraDialog.Cam
     private final OnClickListener mOnClickListener = new OnClickListener() {
         @Override
         public void onClick(final View view) {
+
+            InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
+            File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
+            mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
+
+            try {
+                FileOutputStream os = new FileOutputStream(mCascadeFile);
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
+                is.close();
+                os.close();
+            }catch (Exception e){
+                Log.v(TAG,e.getMessage());
+            }
+
+            mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
+
             synchronized (mSync) {
                 if ((mCameraHandler != null) && !mCameraHandler.isOpened()) {
                     CameraDialog.showDialog(MainActivity.this);
